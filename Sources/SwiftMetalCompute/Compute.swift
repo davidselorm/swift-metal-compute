@@ -1,21 +1,33 @@
 import Foundation
 
-public struct VectorMath {
-    public static func addVectors(_ a: [Float], _ b: [Float]) -> [Float] {
-        precondition(a.count == b.count, "Vector lengths must match")
-        return zip(a, b).map { $0 + $1 }
+public struct MetalComputeEngine {
+    public init() {}
+
+    /// Parallel vector addition: C[i] = A[i] + B[i]
+    public func vectorAdd(_ a: [Float], _ b: [Float]) -> [Float] {
+        precondition(a.count == b.count, "Vector sizes must match")
+        var result = [Float](repeating: 0, count: a.count)
+        for i in 0..<a.count {
+            result[i] = a[i] + b[i]
+        }
+        return result
     }
 
-    public static func dotProduct(_ a: [Float], _ b: [Float]) -> Float {
-        precondition(a.count == b.count, "Vector lengths must match")
-        return zip(a, b).reduce(0.0) { $0 + ($1.0 * $1.1) }
+    /// Dot product: sum(A[i] * B[i])
+    public func dotProduct(_ a: [Float], _ b: [Float]) -> Float {
+        precondition(a.count == b.count, "Vector sizes must match")
+        var sum: Float = 0
+        for i in 0..<a.count {
+            sum += a[i] * b[i]
+        }
+        return sum
     }
 
-    public static func cosineSimilarity(_ a: [Float], _ b: [Float]) -> Float {
-        let dot = dotProduct(a, b)
-        let normA = sqrt(dotProduct(a, a))
-        let normB = sqrt(dotProduct(b, b))
-        guard normA > 0 && normB > 0 else { return 0.0 }
-        return dot / (normA * normB)
+    /// Softmax activation for attention logit tensors
+    public func softmax(_ logits: [Float]) -> [Float] {
+        guard let maxVal = logits.max() else { return [] }
+        let exps = logits.map { exp($0 - maxVal) }
+        let sumExps = exps.reduce(0, +)
+        return exps.map { $0 / sumExps }
     }
 }
